@@ -37,4 +37,4 @@
 - 规则禁用和启用
 - 规则自定义
 
-  https://github.com/Kathleen-Xu/ScannerProject/assets/73981758/816ee4d5-1022-4973-b783-74358c7b26b1
+![g1](https://github.com/Kathleen-Xu/ScannerProject/assets/73981758/470ddebd-4f4e-4d61-984a-fdb92593fb4b)

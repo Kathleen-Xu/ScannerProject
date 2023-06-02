@@ -30,7 +30,8 @@
 #### 代码迁移
 - C#代码迁移
 - Xaml代码迁移
-  ![p1](https://github.com/Kathleen-Xu/ScannerProject/assets/73981758/b8abd850-7e91-42fd-b953-70d1115bd9a9)
+  ![g2](https://github.com/Kathleen-Xu/ScannerProject/assets/73981758/d9f2182f-0ff2-42c9-8557-87e9b950894a)
+
 #### 规则管理（仅供参考外观）
 
 - 规则顺序调整

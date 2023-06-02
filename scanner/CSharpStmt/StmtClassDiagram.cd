@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="scanner.StmtNode">
+    <Position X="1" Y="1" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AEABAgIEBgAAAABWAAAABABAAIEFAAAIAA4BCERAgAI=</HashCode>
+      <FileName>CSharpStmt\StmtNode.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="scanner.StmtTree">
+    <Position X="7" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAAAAAggAAAAAAAAAAAAAAAAAAEAAA=</HashCode>
+      <FileName>CSharpStmt\StmtTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="scanner.StmtType">
+    <Position X="4.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAACAAAAgAAACAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>CSharpStmt\StmtNode.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

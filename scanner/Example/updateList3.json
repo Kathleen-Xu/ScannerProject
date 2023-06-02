@@ -1,0 +1,65 @@
+{
+  "updates": [
+    {
+      "trigger": "DependencyProperty\\.Register",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "type": "Single",
+            "path": "S"
+          },
+          "apiName": "Register",
+          "overridePairs": [
+            {
+              "oldApi": "using System; using System.Windows; class ExampleClass { string name; Type propertyType; Type ownerType; object defaultValue; public readonly DependencyProperty ColorProperty = DependencyProperty.Register(name, propertyType, ownerType); }",
+              "newApi": "${MODIFIER} StyledProperty<$${propertyType}> ${IDENTIFIER} = AvaloniaProperty.Register<$${ownerType},$${propertyType}>(${name});"
+            },
+            {
+              "oldApi": "using System; using System.Windows; class ExampleClass { string name; Type propertyType; Type ownerType; object defaultValue; public readonly DependencyProperty ColorProperty = DependencyProperty.Register(name, propertyType, ownerType, new PropertyMetadata()); }",
+              "newApi": "${MODIFIER} StyledProperty<$${propertyType}> ${IDENTIFIER} = AvaloniaProperty.Register<$${ownerType},$${propertyType}>(${name}+?{defaultValue}+?{inherits}+?{defaultBindingMode}+?{coerceValueCallback});"
+            },
+            {
+              "oldApi": "using System; using System.Windows; class ExampleClass { string name; Type propertyType; Type ownerType; object defaultValue; static bool ValidateValueCallback(object value){ return value==null; } public readonly DependencyProperty ColorProperty = DependencyProperty.Register(name, propertyType, ownerType, new PropertyMetadata(), ValidateValueCallback); }",
+              "newApi": "${MODIFIER} StyledProperty<$${propertyType}> ${IDENTIFIER} = AvaloniaProperty.Register<$${ownerType},$${propertyType}>(${name}+?{defaultValue}+?{inherits}+?{defaultBindingMode}, ${validateValueCallback}+?{coerceValueCallback});"
+            }
+          ],
+          "sideEffects": [
+            {
+              "condition": "propertyChangedCallback",
+              "attachedChanges": [
+                {
+                  "position": {
+                    "type": "FunctionDeclaration",
+                    "path": "C:FC"
+                  },
+                  "codeToAdd": "${IDENTIFIER}.Changed.AddClassHandler<$${ownerType}>(${propertyChangedCallback});",
+                  "relativePos": "inside"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "trigger": "Items\\.Count",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "apiName": "Items.Count",
+          "overridePairs": [
+            {
+              "oldApi": "using System.Windows.Controls; class ExampleClass { int count = new ItemsControl().Items.Count; }",
+              "newApi": "ItemCount"
+            }
+          ],
+          "sideEffects": []
+        }
+      ]
+    }
+  ]
+}

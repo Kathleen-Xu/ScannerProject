@@ -1,0 +1,63 @@
+{
+  "updates": [
+    {
+      "trigger": "this.Loaded\\s*-=\\s*(?<fname>\\S+);",
+      "mode": "noLoop",
+      "changes": [
+        {
+          "position": {
+            "type": "Single",
+            "path": "C:FC/S.${fname}"
+          },
+          "matcher": "this.Loaded\\s*\\+=\\s*${fname};"
+        },
+        {
+          "position": {
+            "type": "FunctionDeclaration",
+            "path": "F"
+          },
+          "oldPattern": ".*${fname}.*",
+          "newPattern": "protected override void OnLoaded()"
+        },
+        {
+          "position": {
+            "type": "Single",
+            "path": "S"
+          },
+          "oldPattern": "this.Loaded\\s*-=\\s*${fname};",
+          "newPattern": "base.OnLoaded();"
+        }
+      ]
+    },
+    {
+      "trigger": "public override void OnApplyTemplate\\(\\)",
+      "mode": "noLoop",
+      "changes": [
+        {
+          "position": {
+            "type": "FunctionDeclaration",
+            "path": "F"
+          },
+          "oldPattern": "public override void OnApplyTemplate\\(\\)",
+          "newPattern": "protected override void OnApplyTemplate(TemplateAppliedEventArgs e)"
+        },
+        {
+          "position": {
+            "type": "Single",
+            "path": "F:S.OnApplyTemplate"
+          },
+          "oldPattern": "base.OnApplyTemplate\\(\\);",
+          "newPattern": "base.onApplyTemplate(e);"
+        },
+        {
+          "position": {
+            "type": "Single",
+            "path": "F:S.GetTemplateChild"
+          },
+          "oldPattern": "GetTemplateChild\\(\"(?<name>\\S+)\"\\) as ContentPresenter;",
+          "newPattern": "e.NameScope.Find<ContentPresenter>(\"${name}\");"
+        }
+      ]
+    }
+  ]
+}

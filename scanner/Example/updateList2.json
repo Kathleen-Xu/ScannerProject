@@ -1,0 +1,54 @@
+{
+  "updates": [
+    {
+      "trigger": "this.Loaded\\s.*;",
+      "mode": "noLoop",
+      "changes": [
+        {
+          "position": {
+            "type": "ClassDeclaration",
+            "path": "C"
+          },
+          "codeToAdd": "protected override void OnLoaded(){ base.OnLoaded(); }",
+          "relativePos": "inside"
+        }
+      ]
+    },
+    {
+      "trigger": "this.Loaded\\s*\\+=\\s*(?<fname>\\S+);",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "type": "Single",
+            "path": "S"
+          },
+          "matcher": "this.Loaded\\s*\\+=\\s*${fname};"
+        },
+        {
+          "position": {
+            "type": "FunctionDeclaration",
+            "path": "C:F.OnLoaded"
+          },
+          "codeToAdd": "${fname}();",
+          "relativePos": "inside"
+        },
+        {
+          "position": {
+            "type": "FunctionDeclaration",
+            "path": "C:F.${fname}"
+          },
+          "oldPattern": "(?<fdec>.*${fname}\\s*)\\(.*\\)",
+          "newPattern": "${fdec}()"
+        },
+        {
+          "position": {
+            "type": "Single",
+            "path": "C:F.${fname}/S.Loaded"
+          },
+          "matcher": "this.Loaded\\s*-=\\s*${fname};"
+        }
+      ]
+    }
+  ]
+}

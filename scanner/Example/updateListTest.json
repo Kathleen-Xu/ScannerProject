@@ -1,0 +1,350 @@
+{
+  "updates": [
+    {
+      "name": "依赖属性注册转换规则",
+      "trigger": "(?<IDENTIFIER>[\\w_]+)[\\s]*=[\\s]*DependencyProperty\\.Register",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "apiName": "Register",
+          "overridePairs": [
+            {
+              "oldApi": "using System; using System.Windows; class ExampleClass { string name; Type propertyType; Type ownerType; object defaultValue; public readonly DependencyProperty ColorProperty = DependencyProperty.Register(name, propertyType, ownerType); }",
+              "newApi": "Register<ownerType, propertyType>(name)"
+            },
+            {
+              "oldApi": "using System; using System.Windows; class ExampleClass { string name; Type propertyType; Type ownerType; object defaultValue; public readonly DependencyProperty ColorProperty = DependencyProperty.Register(name, propertyType, ownerType, new PropertyMetadata()); }",
+              "newApi": "Register<ownerType, propertyType>(name, defaultValue, inherits, defaultBindingMode, coerceValueCallback)"
+            },
+            {
+              "oldApi": "using System; using System.Windows; class ExampleClass { string name; Type propertyType; Type ownerType; object defaultValue; static bool ValidateValueCallback(object value){ return value==null; } public readonly DependencyProperty ColorProperty = DependencyProperty.Register(name, propertyType, ownerType, new PropertyMetadata(), ValidateValueCallback); }",
+              "newApi": "Register<ownerType, propertyType>(name, defaultValue, inherits, defaultBindingMode, validateValueCallback, coerceValueCallback)"
+            }
+          ],
+          "sideEffects": [
+            {
+              "condition": "propertyChangedCallback",
+              "attachedChanges": [
+                {
+                  "position": {
+                    "path": "C:FSC"
+                  },
+                  "codeToAdd": "${IDENTIFIER}.Changed.AddClassHandler<$${ownerType}>(${propertyChangedCallback});",
+                  "relativePos": "inside"
+                }
+              ]
+            },
+            {
+              "condition": "propertyType",
+              "attachedChanges": [
+                {
+                  "position": {
+                    "path": "S"
+                  },
+                  "oldPattern": "([\\s\\S]*)DependencyProperty([\\S\\s]*)=(\\s*)DependencyProperty\\.Register([\\s\\S]*)",
+                  "newPattern": "${1}StyledProperty<$${propertyType}>${2}=${3}AvaloniaProperty.Register${4}"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AddHandler函数转换规则",
+      "trigger": "AddHandler\\s*\\([\\s\\S]*new\\s+RoutedEventHandler[\\s\\S]*\\)",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "apiName": "AddHandler",
+          "overridePairs": [
+            {
+              "oldApi": "using System.Windows; using System.Windows.Controls; class ExampleClass : Button { public ExampleClass() { new UIElement().AddHandler(ClickEvent, new RoutedEventHandler(OnButtonClick)); } void OnButtonClick(object sender, RoutedEventArgs e) {} }",
+              "newApi": "AddHandler(routedEvent, D-handler)"
+            }
+          ],
+          "sideEffects": []
+        }
+      ]
+    },
+    {
+      "name": "矩形图形构造函数转换规则",
+      "trigger": "new RectangleGeometry\\s*\\([\\s\\S]*,[\\s\\S]*,[\\s\\S]*\\)",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "apiName": "RectangleGeometry",
+          "overridePairs": [
+            {
+              "oldApi": "using System.Windows; using System.Windows.Media; class ExampleClass { public ExampleClass() { Rect rect; double radiusX, radiusY; Geometry g = new RectangleGeometry(rect, radiusX, radiusY); }  }",
+              "newApi": "new RectangleGeometry(rect, radiusX, radiusY)"
+            }
+          ],
+          "sideEffects": [
+            {
+              "condition": "radiusX",
+              "attachedChanges": [
+                {
+                  "position": {
+                    "path": "S"
+                  },
+                  "oldPattern": "([\\s\\S]*)new\\s+RectangleGeometry([\\S\\s]*)",
+                  "newPattern": "${1}CreateRectangleGeometry${2}"
+                },
+                {
+                  "position": {
+                    "path": "C"
+                  },
+                  "codeToAdd": "private Geometry CreateRectangleGeometry(Rect rect, double x, double y) { const double PiOver2 = 1.57079633; if (x == 0 && y == 0){ return new RectangleGeometry(rect); } else { var geometry = new StreamGeometry(); var arcSize = new Size(x, y); using (StreamGeometryContext context = geometry.Open()) { context.BeginFigure(new Point(rect.Left + x, rect.Top), true); context.LineTo(new Point(rect.Right - x, rect.Top)); context.ArcTo(new Point(rect.Right, rect.Top + y), arcSize, rotationAngle: PiOver2, isLargeArc: false, SweepDirection.Clockwise); context.LineTo(new Point(rect.Right, rect.Bottom - y)); context.ArcTo(new Point(rect.Right - x, rect.Bottom), arcSize, rotationAngle: PiOver2, isLargeArc: false, SweepDirection.Clockwise); context.LineTo(new Point(rect.Left + x, rect.Bottom)); context.ArcTo(new Point(rect.Left, rect.Bottom - y), arcSize, rotationAngle: PiOver2, isLargeArc: false, SweepDirection.Clockwise); context.LineTo(new Point(rect.Left, rect.Top + y)); context.ArcTo(new Point(rect.Left + x, rect.Top), arcSize, rotationAngle: PiOver2, isLargeArc: false, SweepDirection.Clockwise); context.EndFigure(true); } return geometry; }}",
+                  "relativePos": "inside"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OriginalSource转换规则",
+      "trigger": "OriginalSource",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "apiName": "OriginalSource",
+          "overridePairs": [
+            {
+              "oldApi": "using System.Windows; class ExampleClass { object o = new RoutedEventArgs().OriginalSource; }",
+              "newApi": "Source"
+            }
+          ],
+          "sideEffects": []
+        }
+      ]
+    },
+    {
+      "name": "ActualWidth转换规则",
+      "trigger": "ActualWidth",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "apiName": "ActualWidth",
+          "overridePairs": [
+            {
+              "oldApi": "using System.Windows.Controls; class ExampleClass { double w = new Control().ActualWidth; }",
+              "newApi": "Bounds.Width"
+            }
+          ],
+          "sideEffects": []
+        }
+      ]
+    },
+    {
+      "name": "ActualHeight转换规则",
+      "trigger": "ActualHeight",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "apiName": "ActualHeight",
+          "overridePairs": [
+            {
+              "oldApi": "using System.Windows.Controls; class ExampleClass { double h = new Control().ActualHeight; }",
+              "newApi": "Bounds.Height"
+            }
+          ],
+          "sideEffects": []
+        }
+      ]
+    },
+    {
+      "name": "Visibility转换规则",
+      "trigger": "[^\\w_]?\\bVisibility\\b[^\\w_]?",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "oldPattern": "(?<before>.*[^\\w_])?\\bVisibility\\b(?<after>[^\\w_\\.].*)?",
+          "newPattern": "${before}bool${after}"
+        },
+        {
+          "position": {
+            "path": "S"
+          },
+          "oldPattern": "Visibility.Visible",
+          "newPattern": "true"
+        },
+        {
+          "position": {
+            "path": "S"
+          },
+          "oldPattern": "Visibility.Hidden",
+          "newPattern": "false"
+        },
+        {
+          "position": {
+            "path": "S"
+          },
+          "matcher": "Visibility.Collapsed"
+        }
+      ]
+    },
+    {
+      "name": "OnRender函数转换规则",
+      "trigger": "protected\\s+override\\s+void\\s+OnRender",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "type": "FunctionDeclaration",
+            "path": "F"
+          },
+          "oldPattern": "protected\\s+override\\s+void\\s+OnRender",
+          "newPattern": "public override void Render"
+        },
+        {
+          "position": {
+            "type": "Single",
+            "path": "F:S.OnRender"
+          },
+          "oldPattern": "base.OnRender\\((?<arg>.*)\\);",
+          "newPattern": "base.Render(${arg});"
+        }
+      ]
+    },
+    {
+      "name": "IsItemItsOwnContainerOverride函数转换规则",
+      "trigger": "protected\\s+override\\s+bool\\s+IsItemItsOwnContainerOverride\\s*\\(\\s*object\\s+[\\w_]+\\s*\\)",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "oldPattern": "protected\\s+override\\s+bool\\s+IsItemItsOwnContainerOverride\\s*\\(\\s*object\\s+(?<argName>[\\w_]+)\\s*\\)",
+          "newPattern": "protected override bool IsItemItsOwnContainerOverride(Control ${argName})"
+        }
+      ]
+    },
+    {
+      "name": "ButtonBase转换规则",
+      "trigger": "[^\\w_]?\\bButtonBase\\b[^\\w_]?",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "oldPattern": "(?<before>.*[^\\w_])?\\bButtonBase\\b(?<after>[^\\w_\\.].*)?",
+          "newPattern": "${before}Button${after}"
+        }
+      ]
+    },
+    {
+      "name": "MouseEventArgs转换规则",
+      "trigger": "[^\\w_]?\\bMouseEventArgs\\b[^\\w_]?",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "oldPattern": "(?<before>.*[^\\w_])?\\bMouseEventArgs\\b(?<after>[^\\w_\\.].*)?",
+          "newPattern": "${before}PointerEventArgs${after}"
+        }
+      ]
+    },
+    {
+      "name": "DependencyPropertyChangedEventArgs转换规则",
+      "trigger": "[^\\w_]?\\bDependencyPropertyChangedEventArgs\\b[^\\w_]?",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "oldPattern": "(?<before>.*[^\\w_])?\\bDependencyPropertyChangedEventArgs\\b(?<after>[^\\w_\\.].*)?",
+          "newPattern": "${before}AvaloniaPropertyChangedEventArgs${after}"
+        }
+      ]
+    },
+    {
+      "name": "DependencyObject转换规则",
+      "trigger": "[^\\w_]?\\bDependencyObject\\b[^\\w_]?",
+      "mode": "loop",
+      "changes": [
+        {
+          "position": {
+            "path": "S"
+          },
+          "oldPattern": "(?<before>.*[^\\w_])?\\bDependencyObject\\b(?<after>[^\\w_\\.].*)?",
+          "newPattern": "${before}AvaloniaObject${after}"
+        }
+      ]
+    },
+    {
+      "name": "OnApplyTemplate函数转换规则",
+      "trigger": "public override void OnApplyTemplate\\(\\)",
+      "mode": "noLoop",
+      "changes": [
+        {
+          "position": {
+            "type": "FunctionDeclaration",
+            "path": "F"
+          },
+          "oldPattern": "public override void OnApplyTemplate\\(\\)",
+          "newPattern": "protected override void OnApplyTemplate(TemplateAppliedEventArgs e)"
+        },
+        {
+          "position": {
+            "type": "Single",
+            "path": "F:S.OnApplyTemplate"
+          },
+          "oldPattern": "base.OnApplyTemplate\\(\\);",
+          "newPattern": "base.OnApplyTemplate(e);"
+        },
+        {
+          "position": {
+            "type": "Single",
+            "path": "F:S.GetTemplateChild"
+          },
+          "oldPattern": "GetTemplateChild\\(\"(?<name>[\\w_]+)\"\\) as (?<type>[\\w_]+);",
+          "newPattern": "e.NameScope.Find<${type}>(\"${name}\");"
+        }
+      ]
+    },
+    {
+      "name": "重新渲染属性语句转换规则",
+      "trigger": "^TemplateRoot\\.Clip\\s*=",
+      "mode": "Loop",
+      "changes": [
+        {
+          "position": {
+            "type": "Single",
+            "path": "S"
+          },
+          "oldPattern": "(?<content>TemplateRoot\\.Clip\\s*=.*;)",
+          "newPattern": "Dispatcher.UIThread.Post(() => { ${content} });"
+        }
+      ]
+    }
+  ]
+}
